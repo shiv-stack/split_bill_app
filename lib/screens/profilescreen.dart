@@ -1,8 +1,36 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:split_bill_app/theme/app_colors.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  String? fullName;
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserFullNameonProfile();
+  }
+
+  void _fetchUserFullNameonProfile() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      setState(() {
+        fullName = doc.data()?['fullName'] ?? 'User';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,33 +46,34 @@ class ProfileScreen extends StatelessWidget {
               color: AppColors.background,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Row(
+            child: Row(
               children: [
-                CircleAvatar(
+                const CircleAvatar(
                   radius: 30,
                   backgroundColor: Colors.blueAccent,
                   child: Icon(Icons.person, size: 35, color: Colors.white),
                 ),
-                SizedBox(width: 16),
+                const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Shivamthapa171999",
-                        style: TextStyle(
+                        " ${fullName ?? '...'}",
+                        style: const TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 16),
                       ),
-                      SizedBox(height: 4),
-                      Text(
+                      const SizedBox(height: 4),
+                      const Text(
                         "shivamthapa171999@gmail.com",
-                        style: TextStyle(fontSize: 14, color: AppColors.subText),
+                        style:
+                            TextStyle(fontSize: 14, color: AppColors.subText),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
                 ),
-                Icon(Icons.edit, color: Colors.grey),
+                const Icon(Icons.edit, color: Colors.grey),
               ],
             ),
           ),
